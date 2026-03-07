@@ -1,0 +1,28 @@
+{
+  "name": "create-pinit",
+  "version": "0.1.0",
+  "description": "Scaffold React or Node package projects from production-ready templates",
+  "type": "module",
+  "bin": {
+    "create-pinit": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "degit": "^2.8.4",
+    "kleur": "^4.1.5",
+    "prompts": "^2.4.2"
+  },
+  "keywords": [
+    "scaffold",
+    "template",
+    "react",
+    "node",
+    "starter"
+  ],
+  "license": "MIT"
+}

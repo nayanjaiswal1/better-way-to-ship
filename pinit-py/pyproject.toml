@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pinit"
+version = "0.1.0"
+description = "Scaffold FastAPI, Django, and Python package projects from production-ready templates"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dependencies = []
+keywords = ["scaffold", "template", "fastapi", "django", "cli", "project-generator"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Code Generators",
+]
+
+[project.scripts]
+pinit = "pinit.main:main"
+
+[project.urls]
+Homepage = "https://github.com/nayanjaiswal1/project-templates"
+Repository = "https://github.com/nayanjaiswal1/project-templates"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pinit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "S"]
+ignore = ["S603", "S607"]
