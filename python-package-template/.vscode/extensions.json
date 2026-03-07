@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-python.debugpy",
+    "eamodio.gitlens",
+    "anthropic.claude-code",
+    "github.copilot",
+    "github.copilot-chat",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "tamasfe.even-better-toml",
+    "gruntfuggly.todo-tree"
+  ],
+  "unwantedRecommendations": [
+    "ms-python.black-formatter",
+    "ms-python.flake8",
+    "ms-python.isort"
+  ]
+}

@@ -1,0 +1,195 @@
+[project]
+name = "fastapi-template"
+version = "0.1.0"
+description = "Production-ready async FastAPI backend template"
+requires-python = ">=3.12"
+dependencies = [
+    # Web framework
+    "fastapi[standard]>=0.135,<1.0",
+    "uvicorn[standard]>=0.34,<1.0",
+
+    # Database (async)
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "asyncpg>=0.30,<1.0",
+    "alembic>=1.14,<2.0",
+
+    # Validation / settings
+    "pydantic>=2.10,<3.0",
+    "pydantic-settings>=2.7,<3.0",
+
+    # Security
+    "python-jose[cryptography]>=3.3,<4.0",
+    "passlib[bcrypt]>=1.7,<2.0",
+
+    # HTTP client (for service-to-service calls)
+    "httpx>=0.28,<1.0",
+
+    # Caching
+    "redis[asyncio]>=5.2,<6.0",
+
+    # Structured logging
+    "structlog>=24.4,<25.0",
+
+    # Task queue
+    "celery[redis]>=5.5,<6.0",
+
+    # CORS / middleware
+    "python-multipart>=0.0.20,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "pytest-cov>=6.0,<7.0",
+    "pytest-xdist>=3.6,<4.0",
+    "httpx>=0.28,<1.0",      # async test client
+    "factory-boy>=3.3,<4.0",
+    "faker>=33.0,<34.0",
+    "anyio>=4.7,<5.0",
+
+    # Typing stubs
+    "mypy>=1.14,<2.0",
+    "types-passlib>=1.7,<2.0",
+    "types-python-jose>=3.3,<4.0",
+
+    # Quality
+    "ruff>=0.15,<1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# ---------------------------------------------------------------------------
+# uv
+# ---------------------------------------------------------------------------
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "pytest-cov>=6.0,<7.0",
+    "pytest-xdist>=3.6,<4.0",
+    "httpx>=0.28,<1.0",
+    "factory-boy>=3.3,<4.0",
+    "faker>=33.0,<34.0",
+    "anyio>=4.7,<5.0",
+    "mypy>=1.14,<2.0",
+    "types-passlib>=1.7,<2.0",
+    "types-python-jose>=3.3,<4.0",
+    "ruff>=0.15,<1.0",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "C4",       # flake8-comprehensions
+    "S",        # flake8-bandit (security)
+    "T20",      # flake8-print
+    "RUF",      # Ruff-specific
+    "ANN",      # flake8-annotations
+    "ERA",      # eradicate
+    "SIM",      # flake8-simplify
+    "TID",      # flake8-tidy-imports
+    "PERF",     # perflint
+    "LOG",      # flake8-logging
+    "G",        # flake8-logging-format
+    "ASYNC",    # flake8-async (async best practices)
+    "FAST",     # flake8-fastapi (FastAPI-specific rules)
+]
+ignore = [
+    "ANN101",   # missing type annotation for self
+    "ANN102",   # missing type annotation for cls
+    "S101",     # assert (ok in tests)
+    "S104",     # binding to 0.0.0.0 (ok in containers)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "ANN", "S106"]
+"alembic/**" = ["ANN", "ERA001"]
+"src/app/core/config.py" = ["S105"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# ---------------------------------------------------------------------------
+# MyPy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+warn_return_any = true
+disallow_untyped_decorators = false
+show_error_codes = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+    "--tb=short",
+]
+markers = [
+    "unit: fast, no I/O tests",
+    "integration: requires running database / services",
+    "slow: deliberately slow tests",
+]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "tests/*",
+    "alembic/*",
+    "src/app/main.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+]

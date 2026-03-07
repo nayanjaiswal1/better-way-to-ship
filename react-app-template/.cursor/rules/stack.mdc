@@ -1,0 +1,34 @@
+---
+description: Core tech stack declaration — always active
+alwaysApply: true
+---
+
+# React App Tech Stack
+
+## Runtime
+- **React 19** with concurrent features enabled
+- **TypeScript 5** strict mode — `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
+- **Vite 7** as build tool and dev server
+- **Node 22** minimum
+
+## Package Manager
+- **pnpm 10** — always use `pnpm`, never `npm` or `yarn`
+
+## Testing
+- **Vitest 4** — not Jest
+- **@testing-library/react** — not Enzyme or react-test-renderer
+
+## Linting/Formatting
+- **ESLint 9** flat config (`eslint.config.ts`) with `defineConfig()` API
+- **Prettier 3** for formatting
+- Never suggest `.eslintrc` or legacy config format
+
+## Path Aliases
+- `@/` → `src/` (configured in both `vite.config.ts` and `tsconfig.json`)
+
+## Do NOT suggest
+- Class components
+- `React.FC` type annotation
+- Default exports for components
+- `var` declarations
+- `require()` syntax

@@ -1,0 +1,34 @@
+---
+description: React component authoring rules
+globs: "src/**/*.tsx"
+alwaysApply: false
+---
+
+# Component Rules
+
+## Structure
+```tsx
+// 1. Imports (type imports first)
+import type { ComponentProps } from "react";
+import { useState } from "react";
+
+// 2. Types
+interface ButtonProps extends ComponentProps<"button"> {
+  variant: "primary" | "secondary";
+}
+
+// 3. Component (named export)
+export function Button({ variant, children, ...props }: ButtonProps) {
+  return (
+    <button data-variant={variant} {...props}>
+      {children}
+    </button>
+  );
+}
+```
+
+## Rules
+- Always name the export to match filename: `Button.tsx` → `export function Button`
+- Props interface: `<ComponentName>Props`
+- No inline object styles — use CSS modules or utility classes
+- Keyboard accessibility required for interactive elements

@@ -1,0 +1,37 @@
+---
+description: Public API export rules
+globs: "src/index.ts"
+alwaysApply: false
+---
+
+# Public API Rules
+
+## src/index.ts is the only export surface
+
+All public symbols must be re-exported from `src/index.ts`.
+Internal modules should NOT be exported unless intentional.
+
+## Export style
+```ts
+// Named re-exports only
+export { MyClass } from "./my-class.js";
+export type { MyClassOptions } from "./my-class.js";
+
+// No default exports from index
+```
+
+## JSDoc required on all exports
+```ts
+/**
+ * Parses a configuration object.
+ *
+ * @param input - Raw configuration object
+ * @returns Validated configuration
+ * @throws {ConfigError} If the input is invalid
+ */
+export function parseConfig(input: unknown): Config { ... }
+```
+
+## Versioning note
+Any addition to `src/index.ts` is a public API change.
+Run `pnpm changeset` after adding/removing exports.

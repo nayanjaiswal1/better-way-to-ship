@@ -1,0 +1,32 @@
+---
+description: Python package tech stack — always active
+alwaysApply: true
+---
+
+# Python Package Stack
+
+## Language
+- **Python 3.12+** minimum
+- Always add `from __future__ import annotations` as first import
+- Use `TYPE_CHECKING` guard for type-only imports to avoid circular imports
+
+## Package Manager
+- **uv** — use `uv sync`, `uv run`, `uv build`, `uv publish`
+- Never suggest `pip install` directly; always `uv pip install` or `uv sync`
+
+## Build
+- **Hatchling** build backend
+- `src` layout — package lives in `src/mypkg/`
+- Version controlled only in `src/mypkg/__init__.py`
+
+## Quality
+- **Ruff 0.15** — linting + formatting (Google docstring convention)
+- **MyPy 1.14 strict** — all functions must be fully annotated
+- Coverage threshold: **90%**
+
+## Do NOT suggest
+- `setup.py` or `setup.cfg`
+- `poetry` commands
+- `black`, `flake8`, `isort` separately
+- Removing `py.typed`
+- Putting code directly in `mypkg/__init__.py` (export only)
