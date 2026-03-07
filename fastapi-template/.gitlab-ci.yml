@@ -14,11 +14,13 @@ variables:
       - uv.lock
   paths:
     - .uv-cache
+    - .ruff_cache
+    - .mypy_cache
   policy: pull
 
 .test-env: &test-env
   DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/test_db"
-  SECRET_KEY: "ci-secret-key-32-bytes-not-for-prod"
+  SECRET_KEY: "ci-secret-key-32-bytes-not-for-prod"  # pragma: allowlist secret
   REDIS_URL: "redis://redis:6379/0"
   APP_ENV: "test"
   LOG_JSON: "false"
@@ -37,6 +39,7 @@ before_script:
 # ---------------------------------------------------------------------------
 lint:
   stage: quality
+  interruptible: true
   cache:
     <<: *uv-cache
   script:
@@ -49,6 +52,7 @@ lint:
 
 typecheck:
   stage: quality
+  interruptible: true
   cache:
     <<: *uv-cache
   script:
@@ -75,6 +79,7 @@ sast:
 # ---------------------------------------------------------------------------
 test:
   stage: test
+  interruptible: true
   cache:
     <<: *uv-cache
   services:
@@ -86,7 +91,7 @@ test:
     <<: *test-env
   script:
     - uv run alembic upgrade head
-    - uv run pytest --cov=app --cov-report=xml --cov-report=term-missing -n auto
+    - uv run pytest --cov=app --cov-report=xml --cov-report=term-missing --junit-xml=report.xml -n auto
   coverage: '/TOTAL.*\s(\d+)%$/'
   artifacts:
     reports:
@@ -102,6 +107,7 @@ test:
 
 migrations:
   stage: test
+  interruptible: true
   cache:
     <<: *uv-cache
   services:
