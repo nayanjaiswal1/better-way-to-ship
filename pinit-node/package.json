@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "description": "Scaffold React or Node package projects from production-ready templates",
   "type": "module",
-  "bin": {
-    "create-pinit": "./src/index.js"
-  },
+  "bin": "./src/index.js",
   "files": [
     "src"
   ],

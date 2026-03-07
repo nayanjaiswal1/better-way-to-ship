@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pinit"
+name = "project-pinit"
 version = "0.1.0"
 description = "Scaffold FastAPI, Django, and Python package projects from production-ready templates"
 readme = "README.md"

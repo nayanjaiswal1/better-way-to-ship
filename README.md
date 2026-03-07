@@ -2,6 +2,43 @@
 
 Five minimal, production-ready project templates. Updated March 2026 with the latest stable tooling.
 
+---
+
+## CLI Tools — Scaffold in One Command
+
+Don't clone this repo manually. Use the CLI tools to scaffold any template instantly.
+
+### Python templates (FastAPI, Django, Python package)
+
+```bash
+# no install needed
+uvx project-pinit fastapi my-api
+uvx project-pinit django my-site
+uvx project-pinit pypackage my-lib
+
+# or install globally
+pip install project-pinit
+project-pinit fastapi my-api
+```
+
+> PyPI: https://pypi.org/project/project-pinit/
+
+### Node/React templates (React app, Node package)
+
+```bash
+# no install needed
+npx create-pinit react my-app
+npx create-pinit nodepkg my-lib
+
+# or install globally
+npm install -g create-pinit
+create-pinit react my-app
+```
+
+> npm: https://www.npmjs.com/package/create-pinit
+
+Both tools download the template, rename all placeholders to your project name, and run `git init` with an initial commit — ready to push.
+
 ## Templates
 
 | Template | Language | Package Manager | CI |
