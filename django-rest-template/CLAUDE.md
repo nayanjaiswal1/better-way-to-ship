@@ -75,3 +75,35 @@ chore(deps): upgrade Django to 5.2.1
 - `noreply@anthropic.com` or similar AI service emails
 
 These are rejected by the `no-agent-detail` pre-commit pygrep hook (commit-msg stage).
+
+## Additional Best Practices
+
+### Django Patterns
+- **Fat models** — business logic in models when simple
+- **Service layer** — complex logic in `services.py`
+- **Custom managers** — for querysets
+- **Signals** — for side effects, but sparingly
+
+### REST API
+- **Pagination** — use LimitOffsetPagination or CursorPagination
+- **Filtering** — use django-filter
+- **Versioning** — URL: `/api/v1/`
+- **Caching** — cache with Redis, use cache decorators
+
+### Database
+- **select_related** — for ForeignKey/OneToOne
+- **prefetch_related** — for ManyToMany/reverse FK
+- **only/defer** — fetch only needed fields
+- **Indexes** — add for frequently filtered fields
+
+### Performance
+- **N+1 prevention** — use select/prefetch_related
+- **Database transactions** — use @transaction.atomic
+- **Connection pooling** — gunicorn workers + db connections
+- **Query counting** — django-queryset-debug
+
+### Testing
+- **factory_boy** — for test data
+- **pytest fixtures** — for reusable setup
+- **Model bakery** — quick object creation
+- **APITestCase** — for API tests

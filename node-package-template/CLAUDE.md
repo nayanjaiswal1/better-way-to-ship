@@ -80,3 +80,31 @@ These are stripped by the husky `commit-msg` hook and rejected by the `no-agent-
 - Do not use `.eslintrc.*` — project uses flat config
 - Do not use `require()` in `src/`
 - Do not publish manually — use Changesets
+
+## Additional Best Practices
+
+### Library Design
+- **Single entry point** — export everything from index.ts
+- **Barrel files** — clean exports structure
+- **Deep imports** — avoid, use main export
+- **Types first** — export types alongside functions
+
+### Error Handling
+- **Custom errors** — extend Error class
+- **Error codes** — consistent error format
+- **Validation** — Zod for input validation
+
+### Performance
+- **Lazy initialization** — don't compute on import
+- **Tree shaking** — keep ESM clean
+- **Bundle size** — monitor with rollup-plugin-visualizer
+
+### Testing
+- **Unit tests** — pure functions, no I/O
+- **Integration tests** — with actual dependencies
+- **Mocking** — use Vitest mock utilities
+
+### TypeScript
+- **Strict mode** — always on
+- **No any** — use unknown + narrow
+- **Generics** — for reusable code

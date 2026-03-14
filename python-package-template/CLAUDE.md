@@ -73,3 +73,32 @@ These are rejected by the `no-agent-detail` pre-commit pygrep hook (commit-msg s
 3. `git commit -m "chore: release vX.Y.Z"`
 4. `git tag vX.Y.Z && git push origin vX.Y.Z`
 → CI publishes to PyPI automatically via OIDC
+
+## Additional Best Practices
+
+### Package Design
+- **Minimal dependencies** — keep runtime deps low
+- **Semantic versioning** — follow semver
+- **Entry points** — CLI tools via console_scripts
+- **Optional deps** — extra_require groups
+
+### Type Hints
+- **Strict typing** — MyPy strict mode
+- **Generic types** — for reusable code
+- **Type guards** — for narrowing
+- **Overload** — for complex signatures
+
+### Documentation
+- **Google-style docstrings** — for all public APIs
+- **Examples** — in docstrings
+- **Type hints** — as documentation
+
+### Testing
+- **pytest fixtures** — for reusable setup
+- **Parametrized tests** — for multiple cases
+- **Property-based** — hypothesis for edge cases
+
+### Performance
+- **Lazy imports** — avoid slow imports at top
+- **Caching** — functools.lru_cache
+- **Slots** — __slots__ for classes

@@ -67,3 +67,46 @@ These are stripped by the husky `commit-msg` hook and rejected by the `no-agent-
 - Do not modify `.github/workflows/` without explicit instruction
 - Do not commit `.env` files
 - Do not use `// @ts-ignore` or `// eslint-disable` without justification
+
+## Additional Best Practices
+
+### Next.js / App Router
+- **Server Components** — default, use 'use client' only when needed
+- **Data fetching** — fetch in Server Components, use Suspense
+- **Layouts** — use for shared UI, not for fetching
+- **Route groups** — `(auth)`, `(dashboard)` for organization
+
+### State Management
+- **Server state** — use TanStack Query / SWR
+- **Local state** — useState, useReducer for component-specific
+- **Global state** — Zustand or Context for app-wide (theme, auth)
+- **URL state** — React Router for shareable state
+- **Don't overuse** — don't reach for global state too early
+
+### Forms
+- **React Hook Form** — for form state management
+- **Zod** — for schema validation
+- **Validate both** — client and server side
+
+### Performance
+- **Bundle splitting** — code-split routes with dynamic imports
+- **Lazy loading** — `next/dynamic` for heavy components
+- **Image optimization** — use `next/image`
+- **Memoization** — useMemo, useCallback — don't overuse
+- **Virtualization** — for long lists (react-window)
+
+### Component Guidelines
+- **Small components** — max 400 lines per file
+- **Single responsibility** — each component does one thing
+- **Composition over inheritance**
+- **Prop drilling** — use context or composition
+
+### Error Handling
+- **Error boundaries** — wrap components to catch render errors
+- **try/catch** — for async operations
+- **User-friendly** — show meaningful messages to users
+
+### Security
+- **Validate inputs** — Zod schemas
+- **Sanitize** — prevent XSS
+- **No secrets** — never expose API keys in client code

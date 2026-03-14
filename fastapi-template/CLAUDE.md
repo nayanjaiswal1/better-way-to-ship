@@ -95,3 +95,42 @@ chore(deps): upgrade SQLAlchemy to 2.0.x
 - `noreply@anthropic.com` or similar AI service emails
 
 These are rejected by the `no-agent-detail` pre-commit pygrep hook (commit-msg stage).
+
+## Additional Best Practices
+
+### API Design
+- **REST conventions** — `/users`, `/roadmaps`, use proper HTTP methods
+- **Pagination** — always paginate list endpoints with `limit` and `offset`
+- **Versioning** — use `/api/v1/` prefix
+- **Idempotency** — GET, PUT, DELETE should be safe to retry
+
+### Error Handling
+- **Consistent format** — always return same error structure
+- **AppError hierarchy** — create specific error classes
+- **Log context** — include user_id, request_id, correlation
+- **Graceful degradation** — user-friendly messages, not internal errors
+
+### Performance
+- **Connection pooling** — configure appropriate pool size
+- **Async everywhere** — never block in async functions
+- **N+1 prevention** — use eager loading in SQLAlchemy
+- **Indexing** — add indexes on frequently queried fields
+
+### Caching
+- **Redis** — cache expensive operations
+- **Tenant isolation** — include tenant in cache keys
+- **Stampede protection** — use atomic operations
+- **Invalidation** — track cache keys for proper invalidation
+
+### Docker
+- **Layer optimization** — combine apt-get commands, cleanup in same layer
+- **PYTHONUNBUFFERED=1** — for real-time logging
+- **Multi-stage builds** — smaller final image
+- **.dockerignore** — exclude unnecessary files
+
+### AI/LLM Integration (if applicable)
+- **Maker-Checker** — separate generation from validation
+- **Retry with backoff** — exponential backoff for rate limits
+- **Prompt files** — store prompts in separate `.txt` files
+- **JSON schema** — enforce structured output with Pydantic
+- **Cost control** — rate limit AI endpoints, track token usage
