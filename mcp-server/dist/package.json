@@ -1,0 +1,8 @@
+{
+  "name": "@better-way-to-ship/mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "better-way-to-ship": "./dist/index.js"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@better-way-to-ship/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for software engineering best practices",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "better-way-to-ship": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "start": "node dist/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "keywords": ["mcp", "best-practices", "engineering"],
+  "author": "Nayan Jaiswal",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}
