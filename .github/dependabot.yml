@@ -5,11 +5,13 @@ updates:
     directories: ["/"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
   - package-ecosystem: npm
     directories: ["/mcp-server/dist", "/mcp-server"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
