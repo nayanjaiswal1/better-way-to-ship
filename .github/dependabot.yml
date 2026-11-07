@@ -1,6 +1,15 @@
+# managed: cve-auto-upgrade (security updates only, grouped per ecosystem)
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directories: ["/"]
     schedule: { interval: weekly }
-    open-pull-requests-limit: 0 # security PRs only
+    open-pull-requests-limit: 0 # no version-update PRs
+    groups:
+      security: { applies-to: security-updates, patterns: ["*"] }
+  - package-ecosystem: npm
+    directories: ["/mcp-server/dist", "/mcp-server"]
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 0 # no version-update PRs
+    groups:
+      security: { applies-to: security-updates, patterns: ["*"] }
