@@ -5,23 +5,27 @@ updates:
     directories: ["/"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
   - package-ecosystem: pip
     directories: ["/django-rest-template", "/fastapi-template", "/pinit-py", "/python-package-template"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
   - package-ecosystem: docker
     directories: ["/django-rest-template", "/fastapi-template"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
   - package-ecosystem: npm
     directories: ["/node-package-template", "/pinit-node", "/react-app-template"]
     schedule: { interval: weekly }
     open-pull-requests-limit: 0 # no version-update PRs
+    rebase-strategy: auto
     groups:
       security: { applies-to: security-updates, patterns: ["*"] }
