@@ -1,0 +1,123 @@
+image: python:3.12-slim
+
+variables:
+  UV_CACHE_DIR: ".uv-cache"
+  FF_USE_FASTZIP: "true"
+  POSTGRES_DB: test_db
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_HOST_AUTH_METHOD: trust
+
+.uv-cache: &uv-cache
+  key:
+    files:
+      - uv.lock
+  paths:
+    - .uv-cache
+    - .ruff_cache
+    - .mypy_cache
+  policy: pull
+
+.test-env: &test-env
+  DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/test_db"
+  SECRET_KEY: "ci-secret-key-32-bytes-not-for-prod"  # pragma: allowlist secret
+  REDIS_URL: "redis://redis:6379/0"
+  APP_ENV: "test"
+  LOG_JSON: "false"
+
+stages:
+  - quality
+  - test
+  - release
+
+before_script:
+  - pip install uv --quiet
+  - uv sync --frozen --all-extras
+
+# ---------------------------------------------------------------------------
+# Quality
+# ---------------------------------------------------------------------------
+lint:
+  stage: quality
+  interruptible: true
+  cache:
+    <<: *uv-cache
+  script:
+    - uv run ruff check src tests alembic
+    - uv run ruff format --check src tests alembic
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+typecheck:
+  stage: quality
+  interruptible: true
+  cache:
+    <<: *uv-cache
+  script:
+    - uv run mypy src --config-file=pyproject.toml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Security (GitLab built-in)
+# ---------------------------------------------------------------------------
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+sast:
+  stage: quality
+  variables:
+    SAST_EXCLUDED_PATHS: ".venv, .uv-cache"
+
+# ---------------------------------------------------------------------------
+# Test
+# ---------------------------------------------------------------------------
+test:
+  stage: test
+  interruptible: true
+  cache:
+    <<: *uv-cache
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+    - name: redis:7-alpine
+      alias: redis
+  variables:
+    <<: *test-env
+  script:
+    - uv run alembic upgrade head
+    - uv run pytest --cov=app --cov-report=xml --cov-report=term-missing --junit-xml=report.xml -n auto
+  coverage: '/TOTAL.*\s(\d+)%$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: report.xml
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+migrations:
+  stage: test
+  interruptible: true
+  cache:
+    <<: *uv-cache
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+  variables:
+    <<: *test-env
+  script:
+    - uv run alembic upgrade head
+    - uv run alembic check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

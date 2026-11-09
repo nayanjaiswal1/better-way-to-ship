@@ -1,0 +1,41 @@
+---
+description: FastAPI tech stack — always active
+alwaysApply: true
+---
+
+# FastAPI Stack
+
+## Runtime
+- **FastAPI 0.135+** with Pydantic v2
+- **Python 3.12** — `from __future__ import annotations` in every file
+- **SQLAlchemy 2.0** async ORM + **asyncpg** driver
+- **Alembic** for database migrations
+
+## Configuration
+- **Pydantic Settings** reads `.env` — never `os.environ` directly
+- All settings accessed via `get_settings()` (LRU-cached)
+
+## Logging
+- **structlog** — not `logging.getLogger()`, not `print()`
+- `structlog.get_logger(__name__)` in every module that logs
+
+## Testing
+- **pytest-asyncio** with `asyncio_mode = "auto"`
+- **httpx AsyncClient** (not `TestClient`) for endpoint tests
+- DB session overridden via `app.dependency_overrides[get_db]`
+
+## Package Manager
+- **uv** — always `uv sync`, `uv run`
+
+## Quality
+- **Ruff 0.15** lint + format (includes `FAST` and `ASYNC` rule sets)
+- **MyPy 1.14 strict** + pydantic mypy plugin
+
+## Do NOT suggest
+- `Flask` patterns (sync views, `g`, `current_app`)
+- `HTTPException` raised from service layer — use `AppError` subclasses
+- `TestClient` — use `AsyncClient` from httpx
+- `datetime.now()` — use `datetime.now(UTC)`
+- `os.environ` for config — use `get_settings()`
+- Sync SQLAlchemy patterns (`session.query()`, `.all()` without await)
+- Putting business logic in routers

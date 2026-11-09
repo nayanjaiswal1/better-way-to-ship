@@ -1,0 +1,44 @@
+---
+description: FastAPI router and endpoint authoring rules
+globs: "src/app/api/**/*.py"
+alwaysApply: false
+---
+
+# Endpoint Rules
+
+## Router file structure
+
+```python
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.dependencies.db import get_db
+from app.schemas.my_schema import MyRequest, MyResponse
+from app.services.my_service import MyService
+
+router = APIRouter()
+
+
+@router.post(
+    "",
+    response_model=MyResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Short summary shown in docs",
+)
+async def create_thing(
+    payload: MyRequest,
+    db: AsyncSession = Depends(get_db),
+) -> MyResponse:
+    service = MyService(db)
+    return await service.create(payload)
+```
+
+## Checklist for every endpoint
+- `response_model` always set
+- `status_code` explicit (not relying on 200 default)
+- `summary` set for OpenAPI docs
+- Router calls exactly ONE service method
+- No business logic in the router function body
+- Protected endpoints use `CurrentUserID` from `app.dependencies.auth`

@@ -1,0 +1,135 @@
+image: node:22-alpine
+
+variables:
+  PNPM_VERSION: "10"
+  FF_USE_FASTZIP: "true"
+  CACHE_COMPRESSION_LEVEL: "fast"
+
+# ---------------------------------------------------------------------------
+# Cache strategy: cache pnpm store across all jobs
+# ---------------------------------------------------------------------------
+.pnpm-cache: &pnpm-cache
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store
+  policy: pull
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@${PNPM_VERSION} --activate
+  - pnpm config set store-dir .pnpm-store
+  - pnpm install --frozen-lockfile
+
+# ---------------------------------------------------------------------------
+# Stages
+# ---------------------------------------------------------------------------
+stages:
+  - quality
+  - test
+  - build
+  - release
+
+# ---------------------------------------------------------------------------
+# Quality
+# ---------------------------------------------------------------------------
+typecheck:
+  stage: quality
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm typecheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+lint:
+  stage: quality
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm lint
+    - pnpm format:check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# ---------------------------------------------------------------------------
+# Security (GitLab built-in SAST)
+# ---------------------------------------------------------------------------
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+sast:
+  stage: quality
+  variables:
+    SAST_EXCLUDED_PATHS: "node_modules, dist, coverage"
+
+# ---------------------------------------------------------------------------
+# Test
+# ---------------------------------------------------------------------------
+test:
+  stage: test
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm test:coverage
+  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+      junit: coverage/junit.xml
+    paths:
+      - coverage/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
+build:
+  stage: build
+  cache:
+    <<: *pnpm-cache
+    policy: pull
+  script:
+    - pnpm build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  needs: [typecheck, lint, test]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_TAG
+
+# ---------------------------------------------------------------------------
+# Release (tag-triggered)
+# ---------------------------------------------------------------------------
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs: [build]
+  script:
+    - echo "Creating release for $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: "Release $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Build artifact"
+          url: "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/download?job=build"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/

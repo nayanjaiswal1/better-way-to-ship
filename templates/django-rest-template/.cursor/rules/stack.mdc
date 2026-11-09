@@ -1,0 +1,36 @@
+---
+description: Django REST tech stack — always active
+alwaysApply: true
+---
+
+# Django REST Stack
+
+## Runtime
+- **Django 5.2** + **DRF 3.16**
+- **Python 3.12** — use `from __future__ import annotations` in every file
+- **uv** package manager — use `uv run` prefix for all commands
+
+## Testing
+- **pytest** + **pytest-django** — not Django's `TestCase`
+- **factory-boy** or **model-bakery** for fixtures
+- **httpx** for API client tests
+
+## Linting / Formatting
+- **Ruff 0.15** — replaces flake8, isort, black, pydocstyle
+- **MyPy 1.14 strict** + django-stubs + drf-stubs
+- Never suggest `black`, `flake8`, or `isort` separately
+
+## Settings
+- Split settings: `base / development / production / test`
+- Environment variables via `python-decouple` `config()` — never `os.environ`
+
+## API Layer
+- DRF ViewSets preferred over APIView for CRUD
+- Always add `@extend_schema` from drf-spectacular
+- Custom exception handler wraps all errors in `{"error": {...}}` envelope
+
+## Do NOT suggest
+- Django class-based views (non-DRF)
+- Raw SQL unless absolutely necessary
+- `datetime.now()` — always `django.utils.timezone.now()`
+- `os.environ.get()` for config

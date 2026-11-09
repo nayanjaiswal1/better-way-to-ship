@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  quality:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - run: uv sync --frozen --all-extras
+
+      - name: Ruff lint
+        run: uv run ruff check src tests alembic
+
+      - name: Ruff format check
+        run: uv run ruff format --check src tests alembic
+
+      - name: MyPy
+        run: uv run mypy src --config-file=pyproject.toml
+
+  test:
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - run: uv sync --frozen --all-extras
+
+      - name: Run migrations
+        run: uv run alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: ci-secret-key-32-bytes-not-for-prod
+          APP_ENV: test
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov=app --cov-report=lcov --cov-report=term-missing -n auto
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: ci-secret-key-32-bytes-not-for-prod
+          REDIS_URL: redis://localhost:6379/0
+          APP_ENV: test
+          LOG_JSON: "false"
+
+      - uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.lcov
+          fail_ci_if_error: true
+
+  migrations:
+    name: Migration Check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: migration_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - run: uv sync --frozen --all-extras
+
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/migration_db
+          SECRET_KEY: ci-secret-key-32-bytes-not-for-prod
+          APP_ENV: test
+
+      - name: Verify no unapplied changes
+        run: uv run alembic check
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/migration_db
+          SECRET_KEY: ci-secret-key-32-bytes-not-for-prod
+          APP_ENV: test

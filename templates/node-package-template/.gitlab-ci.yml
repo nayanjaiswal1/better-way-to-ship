@@ -1,0 +1,128 @@
+image: node:22-alpine
+
+variables:
+  PNPM_VERSION: "10"
+  FF_USE_FASTZIP: "true"
+  CACHE_COMPRESSION_LEVEL: "fast"
+
+.pnpm-cache: &pnpm-cache
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store
+  policy: pull
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@${PNPM_VERSION} --activate
+  - pnpm config set store-dir .pnpm-store
+  - pnpm install --frozen-lockfile
+
+stages:
+  - quality
+  - test
+  - build
+  - release
+
+# ---------------------------------------------------------------------------
+# Quality
+# ---------------------------------------------------------------------------
+typecheck:
+  stage: quality
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm typecheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+lint:
+  stage: quality
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm lint
+    - pnpm format:check
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+sast:
+  stage: quality
+  variables:
+    SAST_EXCLUDED_PATHS: "node_modules, dist, coverage"
+
+# ---------------------------------------------------------------------------
+# Test matrix
+# ---------------------------------------------------------------------------
+.test-base: &test-base
+  stage: test
+  cache:
+    <<: *pnpm-cache
+  script:
+    - pnpm test:coverage
+  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    expire_in: 7 days
+
+test:node22:
+  <<: *test-base
+  image: node:22-alpine
+
+test:node24:
+  <<: *test-base
+  image: node:24-alpine
+  artifacts: {}  # skip coverage artifact for secondary matrix
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
+build:
+  stage: build
+  cache:
+    <<: *pnpm-cache
+    policy: pull
+  script:
+    - pnpm build
+    - node -e "require('./dist/index.cjs')"
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  needs: [typecheck, lint, "test:node22"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+# ---------------------------------------------------------------------------
+# Publish to npm (tag-triggered)
+# ---------------------------------------------------------------------------
+publish:
+  stage: release
+  needs: [build]
+  cache:
+    <<: *pnpm-cache
+    policy: pull
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+    - pnpm publish --no-git-checks
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  environment:
+    name: npm
+    url: https://www.npmjs.com/package/node-package-template

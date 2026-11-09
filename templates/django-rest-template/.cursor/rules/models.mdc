@@ -1,0 +1,38 @@
+---
+description: Django model and migration rules
+globs: "src/**/models.py,src/**/models/**"
+alwaysApply: false
+---
+
+# Model Rules
+
+## Structure
+```python
+from __future__ import annotations
+
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class MyModel(models.Model):
+    """One-line description of the model."""
+
+    name = models.CharField(_("name"), max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("my model")
+        verbose_name_plural = _("my models")
+
+    def __str__(self) -> str:
+        return self.name
+```
+
+## Rules
+- Always define `__str__`
+- Always define `Meta` with `verbose_name` and `verbose_name_plural`
+- Use `gettext_lazy` for all field `verbose_name` and `help_text`
+- Use `created_at` / `updated_at` on every model
+- After any model change: run `uv run python src/manage.py makemigrations`

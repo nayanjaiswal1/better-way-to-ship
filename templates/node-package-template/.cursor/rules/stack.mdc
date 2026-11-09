@@ -1,0 +1,43 @@
+---
+description: Node package tech stack — always active
+alwaysApply: true
+---
+
+# Node Package Stack
+
+## Runtime
+- **Node 22** minimum (LTS)
+- **TypeScript 5.8** strict mode
+
+## Package Manager
+- **pnpm 10** — always use `pnpm`, never `npm` or `yarn`
+
+## Build
+- **tsdown** (Rolldown-powered) — NOT tsup (unmaintained as of 2025)
+- Dual ESM + CJS output with `.d.ts` and `.d.cts` type declarations
+- Config: `tsdown.config.ts`
+
+## Testing
+- **Vitest 4** — not Jest
+- Config: `vitest.config.ts`
+- Coverage thresholds: 90% lines/functions/statements, 85% branches
+
+## Linting/Formatting
+- **ESLint 9 flat config** in `eslint.config.ts` using `defineConfig()`
+- **Prettier 3**
+- Never suggest `.eslintrc.*` or legacy config format
+
+## Versioning
+- **Changesets** — `pnpm changeset` then CI handles publish
+- npm provenance enabled (`NPM_CONFIG_PROVENANCE=true`)
+
+## TypeScript Settings (critical)
+- `verbatimModuleSyntax: true` — always use `import type` for types
+- `exactOptionalPropertyTypes: true` — be precise with optional props
+- `noUncheckedIndexedAccess: true` — always check array/object access
+
+## Do NOT suggest
+- `tsup` — replaced by `tsdown`
+- `jest` — using Vitest
+- `require()` in source files
+- Bumping version in `package.json` directly — use `pnpm changeset`

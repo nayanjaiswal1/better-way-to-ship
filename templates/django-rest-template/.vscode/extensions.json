@@ -1,0 +1,41 @@
+{
+  "recommendations": [
+    // Python core
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+
+    // Django
+    "batisteo.vscode-django",
+    "ms-python.debugpy",
+
+    // Testing
+    "ms-python.pytest-adapter",
+
+    // Git & Workflow
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "github.vscode-pull-request-github",
+
+    // AI Agents
+    "anthropic.claude-code",
+    "github.copilot",
+    "github.copilot-chat",
+
+    // DB
+    "cweijan.vscode-postgresql-client2",
+
+    // Quality of life
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "gruntfuggly.todo-tree",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "ms-vscode.makefile-tools"
+  ],
+  "unwantedRecommendations": [
+    "ms-python.black-formatter",
+    "ms-python.flake8",
+    "ms-python.isort"
+  ]
+}
