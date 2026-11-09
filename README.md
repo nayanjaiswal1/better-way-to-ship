@@ -66,3 +66,6 @@ Found something to improve? Open an issue or submit a PR. All contributions welc
 ## 📄 License
 
 MIT
+## Project templates
+
+Production-ready starters (React, FastAPI, Django REST, Python/Node packages) live in [`templates/`](templates/) — merged from the former `project-templates` repo.
